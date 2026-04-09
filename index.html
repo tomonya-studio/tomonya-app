@@ -1,565 +1,188 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ともにゃ〜テンプレアプリ</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f5f5f5;
-      margin: 0;
-      color: #222;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ともにゃ〜ツール</title>
 
-    .container {
-      max-width: 980px;
-      margin: 0 auto;
-    }
+<style>
+body {
+  font-family: sans-serif;
+  background: #f5f5f5;
+  margin: 0;
+  padding: 20px;
+}
 
-    h1 {
-      margin-top: 0;
-      margin-bottom: 20px;
-      font-size: 40px;
-    }
+.container {
+  max-width: 700px;
+  margin: auto;
+}
 
-    h2 {
-      margin-top: 0;
-      margin-bottom: 10px;
-    }
+h1 {
+  font-size: 28px;
+}
 
-    h3 {
-      margin-bottom: 8px;
-    }
+.box {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
 
-    .box {
-      background: white;
-      padding: 20px;
-      border-radius: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
+button {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #333;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
 
-    textarea, input, select {
-      width: 100%;
-      margin-bottom: 14px;
-      border-radius: 10px;
-      padding: 12px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
+.primary {
+  background: #ff6b81;
+}
 
-    textarea {
-      min-height: 90px;
-      resize: vertical;
-    }
+.secondary {
+  background: #5f6caf;
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
+pre {
+  background: #222;
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  white-space: pre-wrap;
+}
 
-    .button-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 8px;
-    }
+.toggle {
+  text-align: center;
+  font-size: 14px;
+  cursor: pointer;
+  color: #666;
+}
 
-    button {
-      padding: 10px 18px;
-      border: none;
-      border-radius: 10px;
-      background: #333;
-      color: white;
-      cursor: pointer;
-      font-size: 14px;
-    }
+.hidden {
+  display: none;
+}
 
-    button.sub {
-      background: #777;
-    }
-
-    button.light {
-      background: #999;
-    }
-
-    button.copy-alt {
-      background: #555;
-    }
-
-    button.preset {
-      background: #5f6caf;
-    }
-
-    .section-title {
-      margin-top: 24px;
-      padding-top: 10px;
-      border-top: 1px solid #eee;
-    }
-
-    pre {
-      background: #222;
-      color: #fff;
-      padding: 15px;
-      border-radius: 10px;
-      white-space: pre-wrap;
-      min-height: 180px;
-      overflow-wrap: break-word;
-    }
-
-    .status {
-      font-size: 14px;
-      color: #666;
-      margin-top: 8px;
-    }
-
-    .small {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 16px;
-    }
-
-    @media (max-width: 700px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      body {
-        padding: 14px;
-      }
-
-      h1 {
-        font-size: 30px;
-      }
-
-      button {
-        width: 100%;
-      }
-    }
-  </style>
+textarea, input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+</style>
 </head>
+
 <body>
-  <div class="container">
-    <h1>ともにゃ〜テンプレ生成</h1>
-
-    <div class="box">
-      <h2>画像生成用</h2>
-      <div class="small">画像の指示を作る用。入力内容は自動保存されます。</div>
-
-      <h3>目的</h3>
-      <input id="imgPurpose" type="text" placeholder="例：配信用アイコン / サムネ / SNS投稿用">
-
-      <h3>被写体</h3>
-      <textarea id="imgSubject" placeholder="例：30代女性 / ボブヘア / ツリ目 / 清楚系"></textarea>
-
-      <h3>雰囲気</h3>
-      <textarea id="imgStyle" placeholder="例：シンプル・おしゃれ・春・やわらかい自然光"></textarea>
-
-      <h3>服装</h3>
-      <textarea id="imgClothes" placeholder="例：白ワンピ / 露出少なめ / 長袖 / 上品"></textarea>
-
-      <h3>背景</h3>
-      <textarea id="imgBg" placeholder="例：明るい室内 / 韓国風カフェ / ナチュラル"></textarea>
-
-      <h3>NG</h3>
-      <textarea id="imgNg" placeholder="例：顔を変えない / 頭身崩さない / 文字入れない">顔を変えない
-頭身崩さない
-文字入れない
-手や指を不自然にしない</textarea>
-
-      <div class="button-row">
-        <button onclick="generateImageTemplate()">画像テンプレ生成</button>
-        <button class="sub" onclick="fillImageExample()">画像用の例</button>
-      </div>
-
-      <div class="status" id="imageSaveStatus">保存済み</div>
-
-      <h2 class="section-title">文章作成用</h2>
-      <div class="small">配信告知やお礼文を作る用。画像用とは別に保存されます。</div>
-
-      <div class="button-row">
-        <button class="preset" onclick="presetNormalStream()">通常配信</button>
-        <button class="preset" onclick="presetNewListenerStream()">ご新規配信</button>
-        <button class="preset" onclick="presetEventLastDay()">イベラス</button>
-        <button class="preset" onclick="presetThankYou()">お礼文</button>
-      </div>
-
-      <div class="grid">
-        <div>
-          <h3>用途</h3>
-          <input id="textPurpose" type="text" placeholder="例：配信告知文 / お礼文">
-        </div>
-        <div>
-          <h3>ターゲット</h3>
-          <input id="textTarget" type="text" placeholder="例：男性 / 50代中心 / 常連＋ご新規">
-        </div>
-      </div>
-
-      <h3>雰囲気</h3>
-      <textarea id="textStyle" placeholder="例：かわいい / 親しみ / やわらかい / わくわく感"></textarea>
-
-      <h3>入れたい要素</h3>
-      <textarea id="textInclude" placeholder="例：感謝 / 来てほしい導線 / 応援したくなる一言"></textarea>
-
-      <h3>補足</h3>
-      <textarea id="textNote" placeholder="例：スマホで読みやすい短文 / コピペ用 / 絵文字少し"></textarea>
-
-      <div class="grid">
-        <div>
-          <h3>配信時間</h3>
-          <input id="streamTime" type="text" placeholder="例：19:30 / 20:30〜">
-        </div>
-        <div>
-          <h3>トーン</h3>
-          <select id="tone">
-            <option value="soft">やわらかめ</option>
-            <option value="strong">しっかりめ</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="button-row">
-        <button onclick="generatePromptTemplate()">文章テンプレ生成</button>
-        <button onclick="generateStreamNotice()">配信告知を作る</button>
-        <button onclick="generateThankYou()">お礼文を作る</button>
-        <button class="sub" onclick="fillStreamExample()">告知用の例</button>
-        <button class="light" onclick="clearAllFields()">全部消す</button>
-      </div>
-
-      <div class="status" id="textSaveStatus">保存済み</div>
-    </div>
-
-    <div class="box">
-      <h2>生成結果</h2>
-      <pre id="output"></pre>
-
-      <div class="button-row">
-        <button onclick="copyOutput()">改行ありコピー</button>
-        <button class="copy-alt" onclick="copyCompactOutput()">改行少なめコピー</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const IMAGE_STORAGE_KEY = "tomonya_image_template_v2";
-    const TEXT_STORAGE_KEY = "tomonya_text_template_v2";
-
-    const imageFieldIds = ["imgPurpose", "imgSubject", "imgStyle", "imgClothes", "imgBg", "imgNg"];
-    const textFieldIds = ["textPurpose", "textTarget", "textStyle", "textInclude", "textNote", "streamTime", "tone"];
-
-    function getImageValues() {
-      return {
-        imgPurpose: document.getElementById("imgPurpose").value,
-        imgSubject: document.getElementById("imgSubject").value,
-        imgStyle: document.getElementById("imgStyle").value,
-        imgClothes: document.getElementById("imgClothes").value,
-        imgBg: document.getElementById("imgBg").value,
-        imgNg: document.getElementById("imgNg").value
-      };
-    }
-
-    function setImageValues(data) {
-      document.getElementById("imgPurpose").value = data.imgPurpose || "";
-      document.getElementById("imgSubject").value = data.imgSubject || "";
-      document.getElementById("imgStyle").value = data.imgStyle || "";
-      document.getElementById("imgClothes").value = data.imgClothes || "";
-      document.getElementById("imgBg").value = data.imgBg || "";
-      document.getElementById("imgNg").value = data.imgNg || "";
-    }
-
-    function getTextValues() {
-      return {
-        textPurpose: document.getElementById("textPurpose").value,
-        textTarget: document.getElementById("textTarget").value,
-        textStyle: document.getElementById("textStyle").value,
-        textInclude: document.getElementById("textInclude").value,
-        textNote: document.getElementById("textNote").value,
-        streamTime: document.getElementById("streamTime").value,
-        tone: document.getElementById("tone").value
-      };
-    }
-
-    function setTextValues(data) {
-      document.getElementById("textPurpose").value = data.textPurpose || "";
-      document.getElementById("textTarget").value = data.textTarget || "";
-      document.getElementById("textStyle").value = data.textStyle || "";
-      document.getElementById("textInclude").value = data.textInclude || "";
-      document.getElementById("textNote").value = data.textNote || "";
-      document.getElementById("streamTime").value = data.streamTime || "";
-      document.getElementById("tone").value = data.tone || "soft";
-    }
-
-    function saveImageData() {
-      localStorage.setItem(IMAGE_STORAGE_KEY, JSON.stringify(getImageValues()));
-      const status = document.getElementById("imageSaveStatus");
-      status.textContent = "画像用を自動保存しました";
-      setTimeout(() => {
-        status.textContent = "保存済み";
-      }, 1000);
-    }
-
-    function saveTextData() {
-      localStorage.setItem(TEXT_STORAGE_KEY, JSON.stringify(getTextValues()));
-      const status = document.getElementById("textSaveStatus");
-      status.textContent = "文章用を自動保存しました";
-      setTimeout(() => {
-        status.textContent = "保存済み";
-      }, 1000);
-    }
-
-    function loadData() {
-      const savedImage = localStorage.getItem(IMAGE_STORAGE_KEY);
-      if (savedImage) {
-        try {
-          setImageValues(JSON.parse(savedImage));
-        } catch (e) {
-          console.log("画像用保存データの読み込み失敗");
-        }
-      }
-
-      const savedText = localStorage.getItem(TEXT_STORAGE_KEY);
-      if (savedText) {
-        try {
-          setTextValues(JSON.parse(savedText));
-        } catch (e) {
-          console.log("文章用保存データの読み込み失敗");
-        }
-      }
-    }
-
-    function setOutput(text) {
-      document.getElementById("output").textContent = text;
-    }
-
-    function generateImageTemplate() {
-      const { imgPurpose, imgSubject, imgStyle, imgClothes, imgBg, imgNg } = getImageValues();
-
-      const text = `【目的】
-${imgPurpose}
-
-【被写体】
-${imgSubject}
-
-【雰囲気】
-${imgStyle}
-
-【服装】
-${imgClothes}
-
-【背景】
-${imgBg}
-
-【NG】
-${imgNg}`;
-
-      setOutput(text);
-    }
-
-    function generatePromptTemplate() {
-      const { textPurpose, textTarget, textStyle, textInclude, textNote } = getTextValues();
-
-      const text = `【用途】
-${textPurpose}
-
-【ターゲット】
-${textTarget}
-
-【雰囲気】
-${textStyle}
-
-【入れたい要素】
-${textInclude}
-
-【補足】
-${textNote}
-
-【NG】
-・長すぎない
-・重すぎない
-・同じ表現ばかりにしない`;
-
-      setOutput(text);
-    }
-
-    function generateStreamNotice() {
-      const { textTarget, textStyle, textInclude, textNote, streamTime, tone } = getTextValues();
-
-      let text = "";
-
-      if (tone === "soft") {
-        text = `${streamTime ? `今日は${streamTime}から配信するよ✨\n\n` : "今日は配信するよ✨\n\n"}${textTarget ? `${textTarget}のみんなにも` : ""}会いに来てもらえたら嬉しいな🥹💖\n\n${textStyle || "まったりしつつ楽しく"}過ごせる時間にしたいと思ってるよ✨\n\n${textInclude || "感謝とわくわく感が伝わる感じ"}で、今日も一緒に楽しい時間作れたら嬉しいです💓\n\n${textNote || "短時間でものぞいてもらえたら嬉しいです☺️"}`;
-      } else {
-        text = `${streamTime ? `今日は${streamTime}から配信します🔥\n\n` : "今日は配信します🔥\n\n"}${textTarget ? `${textTarget}のみんな、` : ""}会いに来てもらえたらすごく嬉しいです✨\n\n${textStyle || "楽しくて勢いのある時間"}にしたいので、来られる方はぜひ遊びに来てね💖\n\n${textInclude || "感謝・来てほしい導線・応援したくなる一言"}を大事にしながら、今日もしっかり盛り上げたいです🔥\n\n${textNote || "応援してもらえたらすごく力になります🙏✨"}`;
-      }
-
-      setOutput(text);
-    }
-
-    function generateThankYou() {
-      const { textTarget, textStyle, textInclude, textNote, tone } = getTextValues();
-
-      let text = "";
-
-      if (tone === "soft") {
-        text = `今日の配信ありがとう🥹💖\n\n${textTarget ? `${textTarget}のみんなも` : ""}来てくれて本当に嬉しかったです✨\n\n${textStyle || "あたたかくて楽しい空気"}の中で過ごせて、すごく幸せな時間だったよ☺️\n\n${textInclude || "感謝の気持ち"}でいっぱいです💓\n\n${textNote || "また次も一緒に楽しい時間作れたら嬉しいです✨"}`;
-      } else {
-        text = `今日の配信ありがとうございました🔥\n\n来てくれたみんな、本当に感謝です✨\n\n${textStyle || "すごくいい空気感"}で最後まで楽しく配信できました！\n\n${textInclude || "応援やコメントひとつひとつ"}が本当に力になりました🙏\n\n${textNote || "また次回も会いに来てもらえたら嬉しいです✨"}`;
-      }
-
-      setOutput(text);
-    }
-
-    function copyOutput() {
-      const output = document.getElementById("output").textContent;
-      if (!output.trim()) {
-        alert("先に生成してね");
-        return;
-      }
-
-      navigator.clipboard.writeText(output)
-        .then(() => alert("コピーしたよ！"))
-        .catch(() => alert("コピーに失敗したので手動でコピーしてね"));
-    }
-
-    function copyCompactOutput() {
-      const output = document.getElementById("output").textContent;
-      if (!output.trim()) {
-        alert("先に生成してね");
-        return;
-      }
-
-      const compact = output
-        .replace(/\n{3,}/g, "\n\n")
-        .replace(/\n/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-
-      navigator.clipboard.writeText(compact)
-        .then(() => alert("改行少なめでコピーしたよ！"))
-        .catch(() => alert("コピーに失敗したので手動でコピーしてね"));
-    }
-
-    function clearAllFields() {
-      if (!confirm("画像用・文章用の入力を全部消す？")) return;
-
-      setImageValues({
-        imgPurpose: "",
-        imgSubject: "",
-        imgStyle: "",
-        imgClothes: "",
-        imgBg: "",
-        imgNg: "顔を変えない\n頭身崩さない\n文字入れない\n手や指を不自然にしない"
-      });
-
-      setTextValues({
-        textPurpose: "",
-        textTarget: "",
-        textStyle: "",
-        textInclude: "",
-        textNote: "",
-        streamTime: "",
-        tone: "soft"
-      });
-
-      setOutput("");
-      localStorage.removeItem(IMAGE_STORAGE_KEY);
-      localStorage.removeItem(TEXT_STORAGE_KEY);
-      document.getElementById("imageSaveStatus").textContent = "リセットしました";
-      document.getElementById("textSaveStatus").textContent = "リセットしました";
-    }
-
-    function fillImageExample() {
-      setImageValues({
-        imgPurpose: "配信用アイコン",
-        imgSubject: "30代女性 / ボブヘア / ツリ目 / 清楚系",
-        imgStyle: "シンプル・おしゃれ・春・やわらかい自然光",
-        imgClothes: "白ワンピ / 露出少なめ / 上品 / 長袖",
-        imgBg: "明るい室内 / 韓国風カフェ / ナチュラル",
-        imgNg: "顔を変えない\n頭身崩さない\n文字入れない\n手や指を不自然にしない"
-      });
-      saveImageData();
-    }
-
-    function fillStreamExample() {
-      setTextValues({
-        textPurpose: "配信告知文",
-        textTarget: "男性 / 50代中心 / 常連＋ご新規",
-        textStyle: "かわいい・親しみ・やわらかい・少しわくわく感",
-        textInclude: "感謝 / 来てほしい導線 / 応援したくなる一言",
-        textNote: "スマホで読みやすい短文 / コピペ用 / 絵文字少し",
-        streamTime: "19:30",
-        tone: "soft"
-      });
-      saveTextData();
-    }
-
-    function presetNormalStream() {
-      setTextValues({
-        textPurpose: "通常配信告知",
-        textTarget: "常連さん中心",
-        textStyle: "親しみ・あたたかい・楽しい・会いに行きたくなる感じ",
-        textInclude: "来てくれると嬉しい / 一緒に楽しい時間 / 歌も楽しめる",
-        textNote: "スマホで読みやすい短文 / コピペ用 / やわらかめ",
-        streamTime: "20:30",
-        tone: "soft"
-      });
-      saveTextData();
-    }
-
-    function presetNewListenerStream() {
-      setTextValues({
-        textPurpose: "ご新規配信告知",
-        textTarget: "常連＋ご新規さん",
-        textStyle: "入りやすい・親しみ・わくわく感・にぎやか",
-        textInclude: "初見さん歓迎 / コメントしやすい / 一緒に盛り上がりたい",
-        textNote: "スマホで読みやすい短文 / ご新規さんも入りやすい感じ",
-        streamTime: "19:30",
-        tone: "soft"
-      });
-      saveTextData();
-    }
-
-    function presetEventLastDay() {
-      setTextValues({
-        textPurpose: "イベラス告知",
-        textTarget: "いつも来てくれる方＋応援してくれる方",
-        textStyle: "熱さ・感謝・一体感・前向き",
-        textInclude: "最後まで頑張りたい / 一緒に走りたい / 応援が力になる",
-        textNote: "重すぎず、でも気持ちはしっかり伝える / 短文で熱量あり",
-        streamTime: "20:30",
-        tone: "strong"
-      });
-      saveTextData();
-    }
-
-    function presetThankYou() {
-      setTextValues({
-        textPurpose: "お礼文",
-        textTarget: "来てくれたみんな",
-        textStyle: "感謝・あたたかい・幸せ・やわらかい",
-        textInclude: "来てくれてありがとう / 応援が嬉しかった / また会いたい",
-        textNote: "やさしい締め / スマホで読みやすい",
-        streamTime: "",
-        tone: "soft"
-      });
-      saveTextData();
-    }
-
-    imageFieldIds.forEach((id) => {
-      document.getElementById(id).addEventListener("input", saveImageData);
-      document.getElementById(id).addEventListener("change", saveImageData);
-    });
-
-    textFieldIds.forEach((id) => {
-      document.getElementById(id).addEventListener("input", saveTextData);
-      document.getElementById(id).addEventListener("change", saveTextData);
-    });
-
-    loadData();
-  </script>
+<div class="container">
+
+<h1>ともにゃ〜告知ツール</h1>
+
+<div class="box">
+
+<button class="primary" onclick="normal()">通常配信</button>
+<button onclick="newUser()">ご新規配信</button>
+<button class="secondary" onclick="eventLast()">イベラス</button>
+<button onclick="thanks()">お礼</button>
+
+</div>
+
+<div class="box">
+<pre id="output"></pre>
+<button onclick="copy()">コピー</button>
+</div>
+
+<div class="toggle" onclick="toggle()">▼ カスタム（上級者）</div>
+
+<div id="custom" class="box hidden">
+
+<input id="time" placeholder="配信時間 例：19:30">
+<textarea id="note" placeholder="追加したい一言"></textarea>
+
+</div>
+
+</div>
+
+<script>
+
+function getTime(){
+  const t = document.getElementById("time").value;
+  return t ? `今日は${t}から配信するよ✨\n\n` : "";
+}
+
+function getNote(){
+  return document.getElementById("note").value || "";
+}
+
+function normal(){
+  const text = `${getTime()}まったり楽しく配信するよ✨
+
+ちょっとでも会いに来てくれたら嬉しいな🥹💖
+
+一緒に楽しい時間過ごそうね💓
+
+${getNote()}`;
+  output(text);
+}
+
+function newUser(){
+  const text = `${getTime()}ご新規さんも大歓迎✨
+
+初見さんでも入りやすい配信だから
+気軽にコメントしてね☺️
+
+一緒に楽しく盛り上がろう💖
+
+${getNote()}`;
+  output(text);
+}
+
+function eventLast(){
+  const text = `${getTime()}イベント最終日🔥
+
+ここまで来れたのは本当にみんなのおかげ🥺
+
+最後まで一緒に走ってくれたら嬉しい✨
+
+応援よろしくお願いします🙏🔥
+
+${getNote()}`;
+  output(text);
+}
+
+function thanks(){
+  const text = `今日の配信ありがとう🥹💖
+
+来てくれて本当に嬉しかった✨
+
+みんなのおかげで楽しい時間になったよ☺️
+
+また会えるの楽しみにしてるね💓
+
+${getNote()}`;
+  output(text);
+}
+
+function output(text){
+  document.getElementById("output").textContent = text;
+}
+
+function copy(){
+  navigator.clipboard.writeText(output.innerText);
+  alert("コピーしたよ！");
+}
+
+function toggle(){
+  const el = document.getElementById("custom");
+  el.classList.toggle("hidden");
+}
+
+</script>
+
 </body>
 </html>
