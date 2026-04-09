@@ -10,81 +10,201 @@
       padding: 20px;
       background: #f5f5f5;
       margin: 0;
+      color: #222;
     }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
     h1 {
       margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 40px;
     }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+    }
+
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
     textarea {
       width: 100%;
-      height: 80px;
-      margin-bottom: 10px;
+      min-height: 90px;
+      margin-bottom: 14px;
       border-radius: 10px;
-      padding: 10px;
+      padding: 12px;
       box-sizing: border-box;
       border: 1px solid #ccc;
+      font-size: 16px;
+      resize: vertical;
     }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
     button {
-      padding: 10px 20px;
+      padding: 10px 18px;
       border: none;
       border-radius: 10px;
       background: #333;
       color: white;
       cursor: pointer;
-      margin-right: 8px;
+      font-size: 14px;
     }
-    .box {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+    button.sub {
+      background: #777;
     }
+
+    button.light {
+      background: #999;
+    }
+
     pre {
       background: #222;
       color: #fff;
       padding: 15px;
       border-radius: 10px;
       white-space: pre-wrap;
-      min-height: 120px;
+      min-height: 160px;
+      overflow-wrap: break-word;
+    }
+
+    .status {
+      font-size: 14px;
+      color: #666;
+      margin-top: 8px;
+    }
+
+    .small {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 14px;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+
+      button {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h1>ともにゃ〜テンプレ生成</h1>
 
-  <h1>ともにゃ〜テンプレ生成</h1>
+    <div class="box">
+      <h2>入力</h2>
+      <div class="small">入力内容は自動保存されます。</div>
 
-  <div class="box">
-    <h3>目的</h3>
-    <textarea id="purpose"></textarea>
+      <h3>目的</h3>
+      <textarea id="purpose" placeholder="例：配信用画像 / SNS投稿 / 配信告知文"></textarea>
 
-    <h3>被写体</h3>
-    <textarea id="subject"></textarea>
+      <h3>被写体</h3>
+      <textarea id="subject" placeholder="例：30代女性 / ボブヘア / ツリ目 / 上品"></textarea>
 
-    <h3>雰囲気</h3>
-    <textarea id="style"></textarea>
+      <h3>雰囲気</h3>
+      <textarea id="style" placeholder="例：韓国カフェ風 / 春 / 清潔感 / やわらかい自然光"></textarea>
 
-    <h3>服装</h3>
-    <textarea id="clothes"></textarea>
+      <h3>服装</h3>
+      <textarea id="clothes" placeholder="例：白ワンピ / 露出少なめ / 長袖 / シンプル"></textarea>
 
-    <h3>背景</h3>
-    <textarea id="bg"></textarea>
+      <h3>背景</h3>
+      <textarea id="bg" placeholder="例：明るい室内 / 韓国風カフェ / おしゃれ / ナチュラル"></textarea>
 
-    <button onclick="generateTemplate()">生成</button>
-  </div>
+      <div class="button-row">
+        <button onclick="generateImageTemplate()">画像テンプレ生成</button>
+        <button onclick="generateStreamTemplate()">配信告知テンプレ生成</button>
+        <button class="sub" onclick="fillImageExample()">画像用の例を入れる</button>
+        <button class="sub" onclick="fillStreamExample()">告知用の例を入れる</button>
+        <button class="light" onclick="clearAllFields()">全部消す</button>
+      </div>
 
-  <div class="box">
-    <h3>生成結果</h3>
-    <pre id="output"></pre>
-    <button onclick="copyOutput()">コピー</button>
+      <div class="status" id="saveStatus">保存済み</div>
+    </div>
+
+    <div class="box">
+      <h2>生成結果</h2>
+      <pre id="output"></pre>
+
+      <div class="button-row">
+        <button onclick="copyOutput()">コピー</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    function generateTemplate() {
-      const purpose = document.getElementById("purpose").value;
-      const subject = document.getElementById("subject").value;
-      const style = document.getElementById("style").value;
-      const clothes = document.getElementById("clothes").value;
-      const bg = document.getElementById("bg").value;
+    const fieldIds = ["purpose", "subject", "style", "clothes", "bg"];
+    const STORAGE_KEY = "tomonya_template_app_v2";
+
+    function getValues() {
+      return {
+        purpose: document.getElementById("purpose").value,
+        subject: document.getElementById("subject").value,
+        style: document.getElementById("style").value,
+        clothes: document.getElementById("clothes").value,
+        bg: document.getElementById("bg").value
+      };
+    }
+
+    function setValues(data) {
+      document.getElementById("purpose").value = data.purpose || "";
+      document.getElementById("subject").value = data.subject || "";
+      document.getElementById("style").value = data.style || "";
+      document.getElementById("clothes").value = data.clothes || "";
+      document.getElementById("bg").value = data.bg || "";
+    }
+
+    function saveData() {
+      const data = getValues();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+      const status = document.getElementById("saveStatus");
+      status.textContent = "自動保存しました";
+      setTimeout(() => {
+        status.textContent = "保存済み";
+      }, 1000);
+    }
+
+    function loadData() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return;
+
+      try {
+        const data = JSON.parse(saved);
+        setValues(data);
+      } catch (e) {
+        console.log("保存データの読み込みに失敗");
+      }
+    }
+
+    function generateImageTemplate() {
+      const { purpose, subject, style, clothes, bg } = getValues();
 
       const text = `【目的】
 ${purpose}
@@ -104,18 +224,94 @@ ${bg}
 【NG】
 ・顔を変えない
 ・頭身崩さない
-・文字入れない`;
+・文字入れない
+・手や指を不自然にしない`;
+
+      document.getElementById("output").textContent = text;
+    }
+
+    function generateStreamTemplate() {
+      const { purpose, subject, style, clothes, bg } = getValues();
+
+      const text = `【用途】
+${purpose}
+
+【ターゲット】
+${subject}
+
+【雰囲気】
+${style}
+
+【入れたい要素】
+${clothes}
+
+【補足】
+${bg}
+
+【NG】
+・長すぎない
+・重すぎない
+・同じ表現ばかりにしない`;
 
       document.getElementById("output").textContent = text;
     }
 
     function copyOutput() {
       const output = document.getElementById("output").textContent;
+
+      if (!output.trim()) {
+        alert("先にテンプレを生成してね");
+        return;
+      }
+
       navigator.clipboard.writeText(output)
         .then(() => alert("コピーしたよ！"))
         .catch(() => alert("コピーに失敗したので手動でコピーしてね"));
     }
-  </script>
 
+    function clearAllFields() {
+      if (!confirm("入力内容を全部消す？")) return;
+
+      setValues({
+        purpose: "",
+        subject: "",
+        style: "",
+        clothes: "",
+        bg: ""
+      });
+
+      document.getElementById("output").textContent = "";
+      localStorage.removeItem(STORAGE_KEY);
+      document.getElementById("saveStatus").textContent = "リセットしました";
+    }
+
+    function fillImageExample() {
+      setValues({
+        purpose: "配信用アイコン",
+        subject: "30代女性 / ボブヘア / ツリ目 / 清楚系",
+        style: "シンプル・おしゃれ・春・やわらかい自然光",
+        clothes: "白ワンピ / 露出少なめ / 上品 / 長袖",
+        bg: "明るい室内 / 韓国風カフェ / ナチュラル"
+      });
+      saveData();
+    }
+
+    function fillStreamExample() {
+      setValues({
+        purpose: "配信告知文",
+        subject: "男性 / 50代中心 / 常連＋ご新規",
+        style: "かわいい・親しみ・やわらかい・少しわくわく感",
+        clothes: "感謝 / 来てほしい導線 / 応援したくなる一言",
+        bg: "スマホで読みやすい短文 / コピペ用 / 絵文字少し"
+      });
+      saveData();
+    }
+
+    fieldIds.forEach((id) => {
+      document.getElementById(id).addEventListener("input", saveData);
+    });
+
+    loadData();
+  </script>
 </body>
 </html>
