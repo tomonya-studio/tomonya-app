@@ -91,6 +91,10 @@
       background: #555;
     }
 
+    button.preset {
+      background: #5f6caf;
+    }
+
     .section-title {
       margin-top: 24px;
       padding-top: 10px;
@@ -177,6 +181,13 @@
       <h2 class="section-title">文章作成用</h2>
       <div class="small">配信告知やお礼文を作る用。画像用とは別に保存されます。</div>
 
+      <div class="button-row">
+        <button class="preset" onclick="presetNormalStream()">通常配信</button>
+        <button class="preset" onclick="presetNewListenerStream()">ご新規配信</button>
+        <button class="preset" onclick="presetEventLastDay()">イベラス</button>
+        <button class="preset" onclick="presetThankYou()">お礼文</button>
+      </div>
+
       <div class="grid">
         <div>
           <h3>用途</h3>
@@ -234,8 +245,8 @@
   </div>
 
   <script>
-    const IMAGE_STORAGE_KEY = "tomonya_image_template_v1";
-    const TEXT_STORAGE_KEY = "tomonya_text_template_v1";
+    const IMAGE_STORAGE_KEY = "tomonya_image_template_v2";
+    const TEXT_STORAGE_KEY = "tomonya_text_template_v2";
 
     const imageFieldIds = ["imgPurpose", "imgSubject", "imgStyle", "imgClothes", "imgBg", "imgNg"];
     const textFieldIds = ["textPurpose", "textTarget", "textStyle", "textInclude", "textNote", "streamTime", "tone"];
@@ -481,6 +492,58 @@ ${textNote}
         textInclude: "感謝 / 来てほしい導線 / 応援したくなる一言",
         textNote: "スマホで読みやすい短文 / コピペ用 / 絵文字少し",
         streamTime: "19:30",
+        tone: "soft"
+      });
+      saveTextData();
+    }
+
+    function presetNormalStream() {
+      setTextValues({
+        textPurpose: "通常配信告知",
+        textTarget: "常連さん中心",
+        textStyle: "親しみ・あたたかい・楽しい・会いに行きたくなる感じ",
+        textInclude: "来てくれると嬉しい / 一緒に楽しい時間 / 歌も楽しめる",
+        textNote: "スマホで読みやすい短文 / コピペ用 / やわらかめ",
+        streamTime: "20:30",
+        tone: "soft"
+      });
+      saveTextData();
+    }
+
+    function presetNewListenerStream() {
+      setTextValues({
+        textPurpose: "ご新規配信告知",
+        textTarget: "常連＋ご新規さん",
+        textStyle: "入りやすい・親しみ・わくわく感・にぎやか",
+        textInclude: "初見さん歓迎 / コメントしやすい / 一緒に盛り上がりたい",
+        textNote: "スマホで読みやすい短文 / ご新規さんも入りやすい感じ",
+        streamTime: "19:30",
+        tone: "soft"
+      });
+      saveTextData();
+    }
+
+    function presetEventLastDay() {
+      setTextValues({
+        textPurpose: "イベラス告知",
+        textTarget: "いつも来てくれる方＋応援してくれる方",
+        textStyle: "熱さ・感謝・一体感・前向き",
+        textInclude: "最後まで頑張りたい / 一緒に走りたい / 応援が力になる",
+        textNote: "重すぎず、でも気持ちはしっかり伝える / 短文で熱量あり",
+        streamTime: "20:30",
+        tone: "strong"
+      });
+      saveTextData();
+    }
+
+    function presetThankYou() {
+      setTextValues({
+        textPurpose: "お礼文",
+        textTarget: "来てくれたみんな",
+        textStyle: "感謝・あたたかい・幸せ・やわらかい",
+        textInclude: "来てくれてありがとう / 応援が嬉しかった / また会いたい",
+        textNote: "やさしい締め / スマホで読みやすい",
+        streamTime: "",
         tone: "soft"
       });
       saveTextData();
