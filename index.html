@@ -1,188 +1,626 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ともにゃ〜ツール</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ともにゃ〜プロンプト生成ツール</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+      margin: 0;
+      color: #222;
+    }
 
-<style>
-body {
-  font-family: sans-serif;
-  background: #f5f5f5;
-  margin: 0;
-  padding: 20px;
-}
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+    }
 
-.container {
-  max-width: 700px;
-  margin: auto;
-}
+    h1 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 36px;
+    }
 
-h1 {
-  font-size: 28px;
-}
+    h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
 
-.box {
-  background: white;
-  padding: 20px;
-  border-radius: 14px;
-  margin-bottom: 20px;
-}
+    h3 {
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
 
-button {
-  width: 100%;
-  padding: 14px;
-  margin-bottom: 10px;
-  border: none;
-  border-radius: 10px;
-  background: #333;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-}
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
 
-.primary {
-  background: #ff6b81;
-}
+    textarea, input, select {
+      width: 100%;
+      margin-bottom: 14px;
+      border-radius: 10px;
+      padding: 12px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      background: white;
+    }
 
-.secondary {
-  background: #5f6caf;
-}
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
 
-pre {
-  background: #222;
-  color: white;
-  padding: 15px;
-  border-radius: 10px;
-  white-space: pre-wrap;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
 
-.toggle {
-  text-align: center;
-  font-size: 14px;
-  cursor: pointer;
-  color: #666;
-}
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
 
-.hidden {
-  display: none;
-}
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
 
-textarea, input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-}
-</style>
+    button {
+      padding: 11px 16px;
+      border: none;
+      border-radius: 10px;
+      background: #333;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button.main {
+      background: #ff6b81;
+    }
+
+    button.sub {
+      background: #777;
+    }
+
+    button.light {
+      background: #999;
+    }
+
+    button.keyword-btn {
+      background: #5f6caf;
+    }
+
+    pre {
+      background: #222;
+      color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      min-height: 220px;
+      overflow-wrap: break-word;
+    }
+
+    .small {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    .status {
+      font-size: 14px;
+      color: #666;
+      margin-top: 8px;
+    }
+
+    .keyword-input-row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .keyword-input-row input {
+      margin-bottom: 0;
+    }
+
+    .keyword-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .keyword-item {
+      background: #eef1ff;
+      border: 1px solid #ccd3ff;
+      border-radius: 999px;
+      padding: 8px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .keyword-item input {
+      width: auto;
+      margin: 0;
+    }
+
+    .keyword-delete {
+      background: transparent;
+      color: #444;
+      border: none;
+      padding: 0;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .section-title {
+      margin-top: 24px;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+    }
+
+    @media (max-width: 800px) {
+      .grid,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .keyword-input-row {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      body {
+        padding: 14px;
+      }
+    }
+  </style>
 </head>
-
 <body>
-<div class="container">
+  <div class="container">
+    <h1>ともにゃ〜プロンプト生成ツール</h1>
 
-<h1>ともにゃ〜告知ツール</h1>
+    <div class="box">
+      <h2>配信プロンプト作成</h2>
+      <div class="small">選ぶだけで、ChatGPTに貼る用のプロンプトを作れます。入力内容とキーワードは自動保存されます。</div>
 
-<div class="box">
+      <div class="grid">
+        <div>
+          <h3>配信タイプ</h3>
+          <select id="streamType">
+            <option value="通常配信">通常配信</option>
+            <option value="ご新規配信">ご新規配信</option>
+            <option value="おしのび配信">おしのび配信</option>
+            <option value="イベラス">イベラス</option>
+            <option value="お礼文">お礼文</option>
+          </select>
+        </div>
 
-<button class="primary" onclick="normal()">通常配信</button>
-<button onclick="newUser()">ご新規配信</button>
-<button class="secondary" onclick="eventLast()">イベラス</button>
-<button onclick="thanks()">お礼</button>
+        <div>
+          <h3>配信時間</h3>
+          <input id="streamTime" type="text" placeholder="例：19:30 / 20:30〜">
+        </div>
+      </div>
 
-</div>
+      <div class="grid-3">
+        <div>
+          <h3>雰囲気</h3>
+          <select id="mood">
+            <option value="かわいい">かわいい</option>
+            <option value="親しみやすい">親しみやすい</option>
+            <option value="落ち着き">落ち着き</option>
+            <option value="甘め">甘め</option>
+            <option value="熱め">熱め</option>
+            <option value="フレンドリー">フレンドリー</option>
+          </select>
+        </div>
 
-<div class="box">
-<pre id="output"></pre>
-<button onclick="copy()">コピー</button>
-</div>
+        <div>
+          <h3>テンション</h3>
+          <select id="tension">
+            <option value="低め">低め</option>
+            <option value="普通">普通</option>
+            <option value="高め">高め</option>
+          </select>
+        </div>
 
-<div class="toggle" onclick="toggle()">▼ カスタム（上級者）</div>
+        <div>
+          <h3>長さ</h3>
+          <select id="length">
+            <option value="短め">短め</option>
+            <option value="普通">普通</option>
+            <option value="長め">長め</option>
+          </select>
+        </div>
+      </div>
 
-<div id="custom" class="box hidden">
+      <div class="grid-3">
+        <div>
+          <h3>絵文字量</h3>
+          <select id="emojiLevel">
+            <option value="なし">なし</option>
+            <option value="少なめ">少なめ</option>
+            <option value="普通">普通</option>
+            <option value="多め">多め</option>
+          </select>
+        </div>
 
-<input id="time" placeholder="配信時間 例：19:30">
-<textarea id="note" placeholder="追加したい一言"></textarea>
+        <div>
+          <h3>顔文字</h3>
+          <select id="kaomojiUsage">
+            <option value="なし">なし</option>
+            <option value="少なめ">少なめ</option>
+            <option value="普通">普通</option>
+            <option value="多め">多め</option>
+          </select>
+        </div>
 
-</div>
+        <div>
+          <h3>顔文字の系統</h3>
+          <select id="kaomojiType">
+            <option value="かわいい">かわいい</option>
+            <option value="あほっぽい">あほっぽい</option>
+            <option value="笑い">笑い</option>
+            <option value="しみじみ">しみじみ</option>
+            <option value="びっくり">びっくり</option>
+          </select>
+        </div>
+      </div>
 
-</div>
+      <h3>入れたい要素</h3>
+      <textarea id="mustInclude" placeholder="例：初見さん歓迎 / 応援したくなる導線 / コメントしやすい雰囲気"></textarea>
 
-<script>
+      <h3>補足メモ</h3>
+      <textarea id="memo" placeholder="例：今日は短時間 / 喉をいたわりつつ / ちょっと厳しめスタート"></textarea>
 
-function getTime(){
-  const t = document.getElementById("time").value;
-  return t ? `今日は${t}から配信するよ✨\n\n` : "";
-}
+      <h2 class="section-title">流行りキーワード</h2>
+      <div class="small">入力して追加すると、次回から選択肢として残ります。</div>
 
-function getNote(){
-  return document.getElementById("note").value || "";
-}
+      <div class="keyword-input-row">
+        <input id="newKeyword" type="text" placeholder="例：エルボ / コア / ナイト / ご新規 / プラマイ">
+        <button class="keyword-btn" onclick="addKeyword()">キーワード追加</button>
+      </div>
 
-function normal(){
-  const text = `${getTime()}まったり楽しく配信するよ✨
+      <div id="keywordList" class="keyword-list"></div>
 
-ちょっとでも会いに来てくれたら嬉しいな🥹💖
+      <div class="button-row">
+        <button class="main" onclick="generatePrompt()">AI用プロンプト生成</button>
+        <button class="sub" onclick="fillExample()">おすすめ初期値を入れる</button>
+        <button class="light" onclick="clearAll()">全部消す</button>
+      </div>
 
-一緒に楽しい時間過ごそうね💓
+      <div class="status" id="saveStatus">保存済み</div>
+    </div>
 
-${getNote()}`;
-  output(text);
-}
+    <div class="box">
+      <h2>生成結果</h2>
+      <pre id="output"></pre>
 
-function newUser(){
-  const text = `${getTime()}ご新規さんも大歓迎✨
+      <div class="button-row">
+        <button onclick="copyOutput()">コピー</button>
+      </div>
+    </div>
+  </div>
 
-初見さんでも入りやすい配信だから
-気軽にコメントしてね☺️
+  <script>
+    const FORM_KEY = "tomonya_prompt_form_v1";
+    const KEYWORD_KEY = "tomonya_prompt_keywords_v1";
 
-一緒に楽しく盛り上がろう💖
+    const defaultKeywords = ["エルボ", "コア", "ナイト", "ご新規", "プラマイ"];
+    let keywords = [];
 
-${getNote()}`;
-  output(text);
-}
+    function $(id) {
+      return document.getElementById(id);
+    }
 
-function eventLast(){
-  const text = `${getTime()}イベント最終日🔥
+    function getFormValues() {
+      return {
+        streamType: $("streamType").value,
+        streamTime: $("streamTime").value,
+        mood: $("mood").value,
+        tension: $("tension").value,
+        length: $("length").value,
+        emojiLevel: $("emojiLevel").value,
+        kaomojiUsage: $("kaomojiUsage").value,
+        kaomojiType: $("kaomojiType").value,
+        mustInclude: $("mustInclude").value,
+        memo: $("memo").value
+      };
+    }
 
-ここまで来れたのは本当にみんなのおかげ🥺
+    function setFormValues(data) {
+      $("streamType").value = data.streamType || "通常配信";
+      $("streamTime").value = data.streamTime || "";
+      $("mood").value = data.mood || "かわいい";
+      $("tension").value = data.tension || "普通";
+      $("length").value = data.length || "短め";
+      $("emojiLevel").value = data.emojiLevel || "普通";
+      $("kaomojiUsage").value = data.kaomojiUsage || "少なめ";
+      $("kaomojiType").value = data.kaomojiType || "かわいい";
+      $("mustInclude").value = data.mustInclude || "";
+      $("memo").value = data.memo || "";
+    }
 
-最後まで一緒に走ってくれたら嬉しい✨
+    function saveForm() {
+      localStorage.setItem(FORM_KEY, JSON.stringify(getFormValues()));
+      showStatus("自動保存しました");
+    }
 
-応援よろしくお願いします🙏🔥
+    function loadForm() {
+      const saved = localStorage.getItem(FORM_KEY);
+      if (!saved) return;
 
-${getNote()}`;
-  output(text);
-}
+      try {
+        setFormValues(JSON.parse(saved));
+      } catch (e) {
+        console.log("フォーム読み込み失敗");
+      }
+    }
 
-function thanks(){
-  const text = `今日の配信ありがとう🥹💖
+    function saveKeywords() {
+      localStorage.setItem(KEYWORD_KEY, JSON.stringify(keywords));
+      renderKeywords();
+      showStatus("キーワードを保存しました");
+    }
 
-来てくれて本当に嬉しかった✨
+    function loadKeywords() {
+      const saved = localStorage.getItem(KEYWORD_KEY);
+      if (!saved) {
+        keywords = defaultKeywords.map(word => ({ word, selected: false }));
+        renderKeywords();
+        return;
+      }
 
-みんなのおかげで楽しい時間になったよ☺️
+      try {
+        const parsed = JSON.parse(saved);
+        keywords = Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        keywords = defaultKeywords.map(word => ({ word, selected: false }));
+      }
 
-また会えるの楽しみにしてるね💓
+      if (keywords.length === 0) {
+        keywords = defaultKeywords.map(word => ({ word, selected: false }));
+      }
 
-${getNote()}`;
-  output(text);
-}
+      renderKeywords();
+    }
 
-function output(text){
-  document.getElementById("output").textContent = text;
-}
+    function showStatus(text) {
+      $("saveStatus").textContent = text;
+      clearTimeout(window.statusTimer);
+      window.statusTimer = setTimeout(() => {
+        $("saveStatus").textContent = "保存済み";
+      }, 1200);
+    }
 
-function copy(){
-  navigator.clipboard.writeText(output.innerText);
-  alert("コピーしたよ！");
-}
+    function renderKeywords() {
+      const list = $("keywordList");
+      list.innerHTML = "";
 
-function toggle(){
-  const el = document.getElementById("custom");
-  el.classList.toggle("hidden");
-}
+      keywords.forEach((item, index) => {
+        const wrapper = document.createElement("label");
+        wrapper.className = "keyword-item";
 
-</script>
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = !!item.selected;
+        checkbox.addEventListener("change", () => {
+          keywords[index].selected = checkbox.checked;
+          localStorage.setItem(KEYWORD_KEY, JSON.stringify(keywords));
+          showStatus("キーワード選択を保存しました");
+        });
 
+        const text = document.createElement("span");
+        text.textContent = item.word;
+
+        const del = document.createElement("button");
+        del.className = "keyword-delete";
+        del.type = "button";
+        del.textContent = "✕";
+        del.addEventListener("click", (e) => {
+          e.preventDefault();
+          deleteKeyword(index);
+        });
+
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(text);
+        wrapper.appendChild(del);
+        list.appendChild(wrapper);
+      });
+    }
+
+    function addKeyword() {
+      const input = $("newKeyword");
+      const word = input.value.trim();
+
+      if (!word) {
+        alert("キーワードを入力してね");
+        return;
+      }
+
+      const exists = keywords.some(item => item.word === word);
+      if (exists) {
+        alert("そのキーワードはもう入ってるよ");
+        return;
+      }
+
+      keywords.push({ word, selected: true });
+      input.value = "";
+      saveKeywords();
+    }
+
+    function deleteKeyword(index) {
+      keywords.splice(index, 1);
+      saveKeywords();
+    }
+
+    function getSelectedKeywords() {
+      return keywords.filter(item => item.selected).map(item => item.word);
+    }
+
+    function generatePrompt() {
+      const form = getFormValues();
+      const selectedKeywords = getSelectedKeywords();
+
+      const keywordText = selectedKeywords.length
+        ? selectedKeywords.join("、")
+        : "特になし";
+
+      const timeText = form.streamTime ? form.streamTime : "未指定";
+
+      const text = `あなたは人気ライバーの配信文章づくりが得意なプロです。
+
+以下の条件で、ChatGPT向けではなく、実際にそのまま使える日本語の文章を作成してください。
+
+【作りたい文章】
+${form.streamType}用の文章
+
+【配信時間】
+${timeText}
+
+【雰囲気】
+${form.mood}
+
+【テンション】
+${form.tension}
+
+【文章の長さ】
+${form.length}
+
+【絵文字量】
+${form.emojiLevel}
+
+【顔文字の使用量】
+${form.kaomojiUsage}
+
+【顔文字の系統】
+${form.kaomojiType}
+
+【必ず入れたい要素】
+${form.mustInclude || "特になし"}
+
+【配信内で使いたいキーワード】
+${keywordText}
+
+【補足メモ】
+${form.memo || "特になし"}
+
+【出力条件】
+・日本語で自然に書く
+・コピペ感が出ないようにする
+・毎回同じにならない言い回しにする
+・配信に来たくなる導線を入れる
+・不自然に大げさすぎる表現は避ける
+・${form.streamType === "お礼文" ? "感謝がしっかり伝わるようにする" : "応援したくなる流れを入れる"}
+・3パターン出してください
+
+【追加条件】
+・それぞれ少しずつ言い回しを変える
+・選んだキーワードは不自然でない範囲で文章に溶け込ませる
+・${form.emojiLevel === "なし" ? "絵文字は使わない" : `絵文字は${form.emojiLevel}で入れる`}
+・${form.kaomojiUsage === "なし" ? "顔文字は使わない" : `顔文字は${form.kaomojiUsage}で、${form.kaomojiType}系を使う`}`;
+
+      $("output").textContent = text;
+    }
+
+    function copyOutput() {
+      const text = $("output").textContent.trim();
+      if (!text) {
+        alert("先に生成してね");
+        return;
+      }
+
+      navigator.clipboard.writeText(text)
+        .then(() => alert("コピーしたよ！"))
+        .catch(() => alert("コピーに失敗したので手動でコピーしてね"));
+    }
+
+    function fillExample() {
+      setFormValues({
+        streamType: "ご新規配信",
+        streamTime: "19:30",
+        mood: "かわいい",
+        tension: "高め",
+        length: "短め",
+        emojiLevel: "普通",
+        kaomojiUsage: "少なめ",
+        kaomojiType: "かわいい",
+        mustInclude: "初見さん歓迎 / コメントしやすい / 応援したくなる導線",
+        memo: "今日は短時間だけど楽しく盛り上がりたい"
+      });
+
+      keywords.forEach(item => {
+        item.selected = ["ご新規", "エルボ", "プラマイ"].includes(item.word);
+      });
+
+      localStorage.setItem(KEYWORD_KEY, JSON.stringify(keywords));
+      saveForm();
+      renderKeywords();
+    }
+
+    function clearAll() {
+      if (!confirm("入力内容とキーワード選択をリセットする？")) return;
+
+      setFormValues({
+        streamType: "通常配信",
+        streamTime: "",
+        mood: "かわいい",
+        tension: "普通",
+        length: "短め",
+        emojiLevel: "普通",
+        kaomojiUsage: "少なめ",
+        kaomojiType: "かわいい",
+        mustInclude: "",
+        memo: ""
+      });
+
+      keywords = defaultKeywords.map(word => ({ word, selected: false }));
+      localStorage.removeItem(FORM_KEY);
+      localStorage.setItem(KEYWORD_KEY, JSON.stringify(keywords));
+      renderKeywords();
+      $("output").textContent = "";
+      showStatus("リセットしました");
+    }
+
+    [
+      "streamType",
+      "streamTime",
+      "mood",
+      "tension",
+      "length",
+      "emojiLevel",
+      "kaomojiUsage",
+      "kaomojiType",
+      "mustInclude",
+      "memo"
+    ].forEach(id => {
+      $(id).addEventListener("input", saveForm);
+      $(id).addEventListener("change", saveForm);
+    });
+
+    loadForm();
+    loadKeywords();
+  </script>
 </body>
 </html>
