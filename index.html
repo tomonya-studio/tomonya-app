@@ -14,7 +14,7 @@
     }
 
     .container {
-      max-width: 920px;
+      max-width: 980px;
       margin: 0 auto;
     }
 
@@ -26,6 +26,7 @@
 
     h2 {
       margin-top: 0;
+      margin-bottom: 10px;
     }
 
     h3 {
@@ -90,6 +91,12 @@
       background: #555;
     }
 
+    .section-title {
+      margin-top: 24px;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+    }
+
     pre {
       background: #222;
       color: #fff;
@@ -136,28 +143,59 @@
     <h1>ともにゃ〜テンプレ生成</h1>
 
     <div class="box">
-      <h2>入力</h2>
-      <div class="small">入力内容は自動保存されます。</div>
+      <h2>画像生成用</h2>
+      <div class="small">画像の指示を作る用。入力内容は自動保存されます。</div>
+
+      <h3>目的</h3>
+      <input id="imgPurpose" type="text" placeholder="例：配信用アイコン / サムネ / SNS投稿用">
+
+      <h3>被写体</h3>
+      <textarea id="imgSubject" placeholder="例：30代女性 / ボブヘア / ツリ目 / 清楚系"></textarea>
+
+      <h3>雰囲気</h3>
+      <textarea id="imgStyle" placeholder="例：シンプル・おしゃれ・春・やわらかい自然光"></textarea>
+
+      <h3>服装</h3>
+      <textarea id="imgClothes" placeholder="例：白ワンピ / 露出少なめ / 長袖 / 上品"></textarea>
+
+      <h3>背景</h3>
+      <textarea id="imgBg" placeholder="例：明るい室内 / 韓国風カフェ / ナチュラル"></textarea>
+
+      <h3>NG</h3>
+      <textarea id="imgNg" placeholder="例：顔を変えない / 頭身崩さない / 文字入れない">顔を変えない
+頭身崩さない
+文字入れない
+手や指を不自然にしない</textarea>
+
+      <div class="button-row">
+        <button onclick="generateImageTemplate()">画像テンプレ生成</button>
+        <button class="sub" onclick="fillImageExample()">画像用の例</button>
+      </div>
+
+      <div class="status" id="imageSaveStatus">保存済み</div>
+
+      <h2 class="section-title">文章作成用</h2>
+      <div class="small">配信告知やお礼文を作る用。画像用とは別に保存されます。</div>
 
       <div class="grid">
         <div>
           <h3>用途</h3>
-          <input id="purpose" type="text" placeholder="例：配信告知文 / お礼文 / 画像生成">
+          <input id="textPurpose" type="text" placeholder="例：配信告知文 / お礼文">
         </div>
         <div>
           <h3>ターゲット</h3>
-          <input id="subject" type="text" placeholder="例：男性 / 50代中心 / 常連＋ご新規">
+          <input id="textTarget" type="text" placeholder="例：男性 / 50代中心 / 常連＋ご新規">
         </div>
       </div>
 
       <h3>雰囲気</h3>
-      <textarea id="style" placeholder="例：かわいい / 親しみ / やわらかい / わくわく感"></textarea>
+      <textarea id="textStyle" placeholder="例：かわいい / 親しみ / やわらかい / わくわく感"></textarea>
 
       <h3>入れたい要素</h3>
-      <textarea id="clothes" placeholder="例：感謝 / 来てほしい導線 / 応援したくなる一言"></textarea>
+      <textarea id="textInclude" placeholder="例：感謝 / 来てほしい導線 / 応援したくなる一言"></textarea>
 
       <h3>補足</h3>
-      <textarea id="bg" placeholder="例：スマホで読みやすい短文 / コピペ用 / 絵文字少し"></textarea>
+      <textarea id="textNote" placeholder="例：スマホで読みやすい短文 / コピペ用 / 絵文字少し"></textarea>
 
       <div class="grid">
         <div>
@@ -174,16 +212,14 @@
       </div>
 
       <div class="button-row">
-        <button onclick="generateImageTemplate()">画像テンプレ生成</button>
         <button onclick="generatePromptTemplate()">文章テンプレ生成</button>
         <button onclick="generateStreamNotice()">配信告知を作る</button>
         <button onclick="generateThankYou()">お礼文を作る</button>
-        <button class="sub" onclick="fillImageExample()">画像用の例</button>
         <button class="sub" onclick="fillStreamExample()">告知用の例</button>
         <button class="light" onclick="clearAllFields()">全部消す</button>
       </div>
 
-      <div class="status" id="saveStatus">保存済み</div>
+      <div class="status" id="textSaveStatus">保存済み</div>
     </div>
 
     <div class="box">
@@ -198,51 +234,89 @@
   </div>
 
   <script>
-    const fieldIds = ["purpose", "subject", "style", "clothes", "bg", "streamTime", "tone"];
-    const STORAGE_KEY = "tomonya_template_app_v3";
+    const IMAGE_STORAGE_KEY = "tomonya_image_template_v1";
+    const TEXT_STORAGE_KEY = "tomonya_text_template_v1";
 
-    function getValues() {
+    const imageFieldIds = ["imgPurpose", "imgSubject", "imgStyle", "imgClothes", "imgBg", "imgNg"];
+    const textFieldIds = ["textPurpose", "textTarget", "textStyle", "textInclude", "textNote", "streamTime", "tone"];
+
+    function getImageValues() {
       return {
-        purpose: document.getElementById("purpose").value,
-        subject: document.getElementById("subject").value,
-        style: document.getElementById("style").value,
-        clothes: document.getElementById("clothes").value,
-        bg: document.getElementById("bg").value,
+        imgPurpose: document.getElementById("imgPurpose").value,
+        imgSubject: document.getElementById("imgSubject").value,
+        imgStyle: document.getElementById("imgStyle").value,
+        imgClothes: document.getElementById("imgClothes").value,
+        imgBg: document.getElementById("imgBg").value,
+        imgNg: document.getElementById("imgNg").value
+      };
+    }
+
+    function setImageValues(data) {
+      document.getElementById("imgPurpose").value = data.imgPurpose || "";
+      document.getElementById("imgSubject").value = data.imgSubject || "";
+      document.getElementById("imgStyle").value = data.imgStyle || "";
+      document.getElementById("imgClothes").value = data.imgClothes || "";
+      document.getElementById("imgBg").value = data.imgBg || "";
+      document.getElementById("imgNg").value = data.imgNg || "";
+    }
+
+    function getTextValues() {
+      return {
+        textPurpose: document.getElementById("textPurpose").value,
+        textTarget: document.getElementById("textTarget").value,
+        textStyle: document.getElementById("textStyle").value,
+        textInclude: document.getElementById("textInclude").value,
+        textNote: document.getElementById("textNote").value,
         streamTime: document.getElementById("streamTime").value,
         tone: document.getElementById("tone").value
       };
     }
 
-    function setValues(data) {
-      document.getElementById("purpose").value = data.purpose || "";
-      document.getElementById("subject").value = data.subject || "";
-      document.getElementById("style").value = data.style || "";
-      document.getElementById("clothes").value = data.clothes || "";
-      document.getElementById("bg").value = data.bg || "";
+    function setTextValues(data) {
+      document.getElementById("textPurpose").value = data.textPurpose || "";
+      document.getElementById("textTarget").value = data.textTarget || "";
+      document.getElementById("textStyle").value = data.textStyle || "";
+      document.getElementById("textInclude").value = data.textInclude || "";
+      document.getElementById("textNote").value = data.textNote || "";
       document.getElementById("streamTime").value = data.streamTime || "";
       document.getElementById("tone").value = data.tone || "soft";
     }
 
-    function saveData() {
-      const data = getValues();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    function saveImageData() {
+      localStorage.setItem(IMAGE_STORAGE_KEY, JSON.stringify(getImageValues()));
+      const status = document.getElementById("imageSaveStatus");
+      status.textContent = "画像用を自動保存しました";
+      setTimeout(() => {
+        status.textContent = "保存済み";
+      }, 1000);
+    }
 
-      const status = document.getElementById("saveStatus");
-      status.textContent = "自動保存しました";
+    function saveTextData() {
+      localStorage.setItem(TEXT_STORAGE_KEY, JSON.stringify(getTextValues()));
+      const status = document.getElementById("textSaveStatus");
+      status.textContent = "文章用を自動保存しました";
       setTimeout(() => {
         status.textContent = "保存済み";
       }, 1000);
     }
 
     function loadData() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) return;
+      const savedImage = localStorage.getItem(IMAGE_STORAGE_KEY);
+      if (savedImage) {
+        try {
+          setImageValues(JSON.parse(savedImage));
+        } catch (e) {
+          console.log("画像用保存データの読み込み失敗");
+        }
+      }
 
-      try {
-        const data = JSON.parse(saved);
-        setValues(data);
-      } catch (e) {
-        console.log("保存データの読み込みに失敗");
+      const savedText = localStorage.getItem(TEXT_STORAGE_KEY);
+      if (savedText) {
+        try {
+          setTextValues(JSON.parse(savedText));
+        } catch (e) {
+          console.log("文章用保存データの読み込み失敗");
+        }
       }
     }
 
@@ -251,49 +325,46 @@
     }
 
     function generateImageTemplate() {
-      const { purpose, subject, style, clothes, bg } = getValues();
+      const { imgPurpose, imgSubject, imgStyle, imgClothes, imgBg, imgNg } = getImageValues();
 
       const text = `【目的】
-${purpose}
+${imgPurpose}
 
 【被写体】
-${subject}
+${imgSubject}
 
 【雰囲気】
-${style}
+${imgStyle}
 
 【服装】
-${clothes}
+${imgClothes}
 
 【背景】
-${bg}
+${imgBg}
 
 【NG】
-・顔を変えない
-・頭身崩さない
-・文字入れない
-・手や指を不自然にしない`;
+${imgNg}`;
 
       setOutput(text);
     }
 
     function generatePromptTemplate() {
-      const { purpose, subject, style, clothes, bg } = getValues();
+      const { textPurpose, textTarget, textStyle, textInclude, textNote } = getTextValues();
 
       const text = `【用途】
-${purpose}
+${textPurpose}
 
 【ターゲット】
-${subject}
+${textTarget}
 
 【雰囲気】
-${style}
+${textStyle}
 
 【入れたい要素】
-${clothes}
+${textInclude}
 
 【補足】
-${bg}
+${textNote}
 
 【NG】
 ・長すぎない
@@ -304,28 +375,28 @@ ${bg}
     }
 
     function generateStreamNotice() {
-      const { subject, style, clothes, bg, streamTime, tone } = getValues();
+      const { textTarget, textStyle, textInclude, textNote, streamTime, tone } = getTextValues();
 
       let text = "";
 
       if (tone === "soft") {
-        text = `${streamTime ? `今日は${streamTime}から配信するよ✨\n\n` : "今日は配信するよ✨\n\n"}${subject ? `${subject}のみんなにも` : ""}会いに来てもらえたら嬉しいな🥹💖\n\n${style || "まったりしつつ楽しく"}過ごせる時間にしたいと思ってるよ✨\n\n${clothes || "感謝とわくわく感が伝わる感じ"}で、今日も一緒に楽しい時間作れたら嬉しいです💓\n\n${bg || "短時間でものぞいてもらえたら嬉しいです☺️"}`;
+        text = `${streamTime ? `今日は${streamTime}から配信するよ✨\n\n` : "今日は配信するよ✨\n\n"}${textTarget ? `${textTarget}のみんなにも` : ""}会いに来てもらえたら嬉しいな🥹💖\n\n${textStyle || "まったりしつつ楽しく"}過ごせる時間にしたいと思ってるよ✨\n\n${textInclude || "感謝とわくわく感が伝わる感じ"}で、今日も一緒に楽しい時間作れたら嬉しいです💓\n\n${textNote || "短時間でものぞいてもらえたら嬉しいです☺️"}`;
       } else {
-        text = `${streamTime ? `今日は${streamTime}から配信します🔥\n\n` : "今日は配信します🔥\n\n"}${subject ? `${subject}のみんな、` : ""}会いに来てもらえたらすごく嬉しいです✨\n\n${style || "楽しくて勢いのある時間"}にしたいので、来られる方はぜひ遊びに来てね💖\n\n${clothes || "感謝・来てほしい導線・応援したくなる一言"}を大事にしながら、今日もしっかり盛り上げたいです🔥\n\n${bg || "応援してもらえたらすごく力になります🙏✨"}`;
+        text = `${streamTime ? `今日は${streamTime}から配信します🔥\n\n` : "今日は配信します🔥\n\n"}${textTarget ? `${textTarget}のみんな、` : ""}会いに来てもらえたらすごく嬉しいです✨\n\n${textStyle || "楽しくて勢いのある時間"}にしたいので、来られる方はぜひ遊びに来てね💖\n\n${textInclude || "感謝・来てほしい導線・応援したくなる一言"}を大事にしながら、今日もしっかり盛り上げたいです🔥\n\n${textNote || "応援してもらえたらすごく力になります🙏✨"}`;
       }
 
       setOutput(text);
     }
 
     function generateThankYou() {
-      const { subject, style, clothes, bg, tone } = getValues();
+      const { textTarget, textStyle, textInclude, textNote, tone } = getTextValues();
 
       let text = "";
 
       if (tone === "soft") {
-        text = `今日の配信ありがとう🥹💖\n\n${subject ? `${subject}のみんなも` : ""}来てくれて本当に嬉しかったです✨\n\n${style || "あたたかくて楽しい空気"}の中で過ごせて、すごく幸せな時間だったよ☺️\n\n${clothes || "感謝の気持ち"}でいっぱいです💓\n\n${bg || "また次も一緒に楽しい時間作れたら嬉しいです✨"}`;
+        text = `今日の配信ありがとう🥹💖\n\n${textTarget ? `${textTarget}のみんなも` : ""}来てくれて本当に嬉しかったです✨\n\n${textStyle || "あたたかくて楽しい空気"}の中で過ごせて、すごく幸せな時間だったよ☺️\n\n${textInclude || "感謝の気持ち"}でいっぱいです💓\n\n${textNote || "また次も一緒に楽しい時間作れたら嬉しいです✨"}`;
       } else {
-        text = `今日の配信ありがとうございました🔥\n\n来てくれたみんな、本当に感謝です✨\n\n${style || "すごくいい空気感"}で最後まで楽しく配信できました！\n\n${clothes || "応援やコメントひとつひとつ"}が本当に力になりました🙏\n\n${bg || "また次回も会いに来てもらえたら嬉しいです✨"}`;
+        text = `今日の配信ありがとうございました🔥\n\n来てくれたみんな、本当に感謝です✨\n\n${textStyle || "すごくいい空気感"}で最後まで楽しく配信できました！\n\n${textInclude || "応援やコメントひとつひとつ"}が本当に力になりました🙏\n\n${textNote || "また次回も会いに来てもらえたら嬉しいです✨"}`;
       }
 
       setOutput(text);
@@ -333,7 +404,6 @@ ${bg}
 
     function copyOutput() {
       const output = document.getElementById("output").textContent;
-
       if (!output.trim()) {
         alert("先に生成してね");
         return;
@@ -346,7 +416,6 @@ ${bg}
 
     function copyCompactOutput() {
       const output = document.getElementById("output").textContent;
-
       if (!output.trim()) {
         alert("先に生成してね");
         return;
@@ -364,52 +433,67 @@ ${bg}
     }
 
     function clearAllFields() {
-      if (!confirm("入力内容を全部消す？")) return;
+      if (!confirm("画像用・文章用の入力を全部消す？")) return;
 
-      setValues({
-        purpose: "",
-        subject: "",
-        style: "",
-        clothes: "",
-        bg: "",
+      setImageValues({
+        imgPurpose: "",
+        imgSubject: "",
+        imgStyle: "",
+        imgClothes: "",
+        imgBg: "",
+        imgNg: "顔を変えない\n頭身崩さない\n文字入れない\n手や指を不自然にしない"
+      });
+
+      setTextValues({
+        textPurpose: "",
+        textTarget: "",
+        textStyle: "",
+        textInclude: "",
+        textNote: "",
         streamTime: "",
         tone: "soft"
       });
 
       setOutput("");
-      localStorage.removeItem(STORAGE_KEY);
-      document.getElementById("saveStatus").textContent = "リセットしました";
+      localStorage.removeItem(IMAGE_STORAGE_KEY);
+      localStorage.removeItem(TEXT_STORAGE_KEY);
+      document.getElementById("imageSaveStatus").textContent = "リセットしました";
+      document.getElementById("textSaveStatus").textContent = "リセットしました";
     }
 
     function fillImageExample() {
-      setValues({
-        purpose: "配信用アイコン",
-        subject: "30代女性 / ボブヘア / ツリ目 / 清楚系",
-        style: "シンプル・おしゃれ・春・やわらかい自然光",
-        clothes: "白ワンピ / 露出少なめ / 上品 / 長袖",
-        bg: "明るい室内 / 韓国風カフェ / ナチュラル",
-        streamTime: "",
-        tone: "soft"
+      setImageValues({
+        imgPurpose: "配信用アイコン",
+        imgSubject: "30代女性 / ボブヘア / ツリ目 / 清楚系",
+        imgStyle: "シンプル・おしゃれ・春・やわらかい自然光",
+        imgClothes: "白ワンピ / 露出少なめ / 上品 / 長袖",
+        imgBg: "明るい室内 / 韓国風カフェ / ナチュラル",
+        imgNg: "顔を変えない\n頭身崩さない\n文字入れない\n手や指を不自然にしない"
       });
-      saveData();
+      saveImageData();
     }
 
     function fillStreamExample() {
-      setValues({
-        purpose: "配信告知文",
-        subject: "男性 / 50代中心 / 常連＋ご新規",
-        style: "かわいい・親しみ・やわらかい・少しわくわく感",
-        clothes: "感謝 / 来てほしい導線 / 応援したくなる一言",
-        bg: "スマホで読みやすい短文 / コピペ用 / 絵文字少し",
+      setTextValues({
+        textPurpose: "配信告知文",
+        textTarget: "男性 / 50代中心 / 常連＋ご新規",
+        textStyle: "かわいい・親しみ・やわらかい・少しわくわく感",
+        textInclude: "感謝 / 来てほしい導線 / 応援したくなる一言",
+        textNote: "スマホで読みやすい短文 / コピペ用 / 絵文字少し",
         streamTime: "19:30",
         tone: "soft"
       });
-      saveData();
+      saveTextData();
     }
 
-    fieldIds.forEach((id) => {
-      document.getElementById(id).addEventListener("input", saveData);
-      document.getElementById(id).addEventListener("change", saveData);
+    imageFieldIds.forEach((id) => {
+      document.getElementById(id).addEventListener("input", saveImageData);
+      document.getElementById(id).addEventListener("change", saveImageData);
+    });
+
+    textFieldIds.forEach((id) => {
+      document.getElementById(id).addEventListener("input", saveTextData);
+      document.getElementById(id).addEventListener("change", saveTextData);
     });
 
     loadData();
