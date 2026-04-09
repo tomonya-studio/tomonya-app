@@ -40,16 +40,25 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
-    textarea {
+    textarea, input, select {
       width: 100%;
-      min-height: 90px;
       margin-bottom: 14px;
       border-radius: 10px;
       padding: 12px;
       box-sizing: border-box;
       border: 1px solid #ccc;
       font-size: 16px;
+    }
+
+    textarea {
+      min-height: 90px;
       resize: vertical;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
     }
 
     .button-row {
@@ -77,13 +86,17 @@
       background: #999;
     }
 
+    button.copy-alt {
+      background: #555;
+    }
+
     pre {
       background: #222;
       color: #fff;
       padding: 15px;
       border-radius: 10px;
       white-space: pre-wrap;
-      min-height: 160px;
+      min-height: 180px;
       overflow-wrap: break-word;
     }
 
@@ -99,7 +112,11 @@
       margin-bottom: 16px;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
       body {
         padding: 14px;
       }
@@ -122,26 +139,47 @@
       <h2>入力</h2>
       <div class="small">入力内容は自動保存されます。</div>
 
-      <h3>目的</h3>
-      <textarea id="purpose" placeholder="例：配信用画像 / SNS投稿 / 配信告知文"></textarea>
-
-      <h3>被写体</h3>
-      <textarea id="subject" placeholder="例：30代女性 / ボブヘア / ツリ目 / 上品"></textarea>
+      <div class="grid">
+        <div>
+          <h3>用途</h3>
+          <input id="purpose" type="text" placeholder="例：配信告知文 / お礼文 / 画像生成">
+        </div>
+        <div>
+          <h3>ターゲット</h3>
+          <input id="subject" type="text" placeholder="例：男性 / 50代中心 / 常連＋ご新規">
+        </div>
+      </div>
 
       <h3>雰囲気</h3>
-      <textarea id="style" placeholder="例：韓国カフェ風 / 春 / 清潔感 / やわらかい自然光"></textarea>
+      <textarea id="style" placeholder="例：かわいい / 親しみ / やわらかい / わくわく感"></textarea>
 
-      <h3>服装</h3>
-      <textarea id="clothes" placeholder="例：白ワンピ / 露出少なめ / 長袖 / シンプル"></textarea>
+      <h3>入れたい要素</h3>
+      <textarea id="clothes" placeholder="例：感謝 / 来てほしい導線 / 応援したくなる一言"></textarea>
 
-      <h3>背景</h3>
-      <textarea id="bg" placeholder="例：明るい室内 / 韓国風カフェ / おしゃれ / ナチュラル"></textarea>
+      <h3>補足</h3>
+      <textarea id="bg" placeholder="例：スマホで読みやすい短文 / コピペ用 / 絵文字少し"></textarea>
+
+      <div class="grid">
+        <div>
+          <h3>配信時間</h3>
+          <input id="streamTime" type="text" placeholder="例：19:30 / 20:30〜">
+        </div>
+        <div>
+          <h3>トーン</h3>
+          <select id="tone">
+            <option value="soft">やわらかめ</option>
+            <option value="strong">しっかりめ</option>
+          </select>
+        </div>
+      </div>
 
       <div class="button-row">
         <button onclick="generateImageTemplate()">画像テンプレ生成</button>
-        <button onclick="generateStreamTemplate()">配信告知テンプレ生成</button>
-        <button class="sub" onclick="fillImageExample()">画像用の例を入れる</button>
-        <button class="sub" onclick="fillStreamExample()">告知用の例を入れる</button>
+        <button onclick="generatePromptTemplate()">文章テンプレ生成</button>
+        <button onclick="generateStreamNotice()">配信告知を作る</button>
+        <button onclick="generateThankYou()">お礼文を作る</button>
+        <button class="sub" onclick="fillImageExample()">画像用の例</button>
+        <button class="sub" onclick="fillStreamExample()">告知用の例</button>
         <button class="light" onclick="clearAllFields()">全部消す</button>
       </div>
 
@@ -153,14 +191,15 @@
       <pre id="output"></pre>
 
       <div class="button-row">
-        <button onclick="copyOutput()">コピー</button>
+        <button onclick="copyOutput()">改行ありコピー</button>
+        <button class="copy-alt" onclick="copyCompactOutput()">改行少なめコピー</button>
       </div>
     </div>
   </div>
 
   <script>
-    const fieldIds = ["purpose", "subject", "style", "clothes", "bg"];
-    const STORAGE_KEY = "tomonya_template_app_v2";
+    const fieldIds = ["purpose", "subject", "style", "clothes", "bg", "streamTime", "tone"];
+    const STORAGE_KEY = "tomonya_template_app_v3";
 
     function getValues() {
       return {
@@ -168,7 +207,9 @@
         subject: document.getElementById("subject").value,
         style: document.getElementById("style").value,
         clothes: document.getElementById("clothes").value,
-        bg: document.getElementById("bg").value
+        bg: document.getElementById("bg").value,
+        streamTime: document.getElementById("streamTime").value,
+        tone: document.getElementById("tone").value
       };
     }
 
@@ -178,6 +219,8 @@
       document.getElementById("style").value = data.style || "";
       document.getElementById("clothes").value = data.clothes || "";
       document.getElementById("bg").value = data.bg || "";
+      document.getElementById("streamTime").value = data.streamTime || "";
+      document.getElementById("tone").value = data.tone || "soft";
     }
 
     function saveData() {
@@ -201,6 +244,10 @@
       } catch (e) {
         console.log("保存データの読み込みに失敗");
       }
+    }
+
+    function setOutput(text) {
+      document.getElementById("output").textContent = text;
     }
 
     function generateImageTemplate() {
@@ -227,10 +274,10 @@ ${bg}
 ・文字入れない
 ・手や指を不自然にしない`;
 
-      document.getElementById("output").textContent = text;
+      setOutput(text);
     }
 
-    function generateStreamTemplate() {
+    function generatePromptTemplate() {
       const { purpose, subject, style, clothes, bg } = getValues();
 
       const text = `【用途】
@@ -253,19 +300,66 @@ ${bg}
 ・重すぎない
 ・同じ表現ばかりにしない`;
 
-      document.getElementById("output").textContent = text;
+      setOutput(text);
+    }
+
+    function generateStreamNotice() {
+      const { subject, style, clothes, bg, streamTime, tone } = getValues();
+
+      let text = "";
+
+      if (tone === "soft") {
+        text = `${streamTime ? `今日は${streamTime}から配信するよ✨\n\n` : "今日は配信するよ✨\n\n"}${subject ? `${subject}のみんなにも` : ""}会いに来てもらえたら嬉しいな🥹💖\n\n${style || "まったりしつつ楽しく"}過ごせる時間にしたいと思ってるよ✨\n\n${clothes || "感謝とわくわく感が伝わる感じ"}で、今日も一緒に楽しい時間作れたら嬉しいです💓\n\n${bg || "短時間でものぞいてもらえたら嬉しいです☺️"}`;
+      } else {
+        text = `${streamTime ? `今日は${streamTime}から配信します🔥\n\n` : "今日は配信します🔥\n\n"}${subject ? `${subject}のみんな、` : ""}会いに来てもらえたらすごく嬉しいです✨\n\n${style || "楽しくて勢いのある時間"}にしたいので、来られる方はぜひ遊びに来てね💖\n\n${clothes || "感謝・来てほしい導線・応援したくなる一言"}を大事にしながら、今日もしっかり盛り上げたいです🔥\n\n${bg || "応援してもらえたらすごく力になります🙏✨"}`;
+      }
+
+      setOutput(text);
+    }
+
+    function generateThankYou() {
+      const { subject, style, clothes, bg, tone } = getValues();
+
+      let text = "";
+
+      if (tone === "soft") {
+        text = `今日の配信ありがとう🥹💖\n\n${subject ? `${subject}のみんなも` : ""}来てくれて本当に嬉しかったです✨\n\n${style || "あたたかくて楽しい空気"}の中で過ごせて、すごく幸せな時間だったよ☺️\n\n${clothes || "感謝の気持ち"}でいっぱいです💓\n\n${bg || "また次も一緒に楽しい時間作れたら嬉しいです✨"}`;
+      } else {
+        text = `今日の配信ありがとうございました🔥\n\n来てくれたみんな、本当に感謝です✨\n\n${style || "すごくいい空気感"}で最後まで楽しく配信できました！\n\n${clothes || "応援やコメントひとつひとつ"}が本当に力になりました🙏\n\n${bg || "また次回も会いに来てもらえたら嬉しいです✨"}`;
+      }
+
+      setOutput(text);
     }
 
     function copyOutput() {
       const output = document.getElementById("output").textContent;
 
       if (!output.trim()) {
-        alert("先にテンプレを生成してね");
+        alert("先に生成してね");
         return;
       }
 
       navigator.clipboard.writeText(output)
         .then(() => alert("コピーしたよ！"))
+        .catch(() => alert("コピーに失敗したので手動でコピーしてね"));
+    }
+
+    function copyCompactOutput() {
+      const output = document.getElementById("output").textContent;
+
+      if (!output.trim()) {
+        alert("先に生成してね");
+        return;
+      }
+
+      const compact = output
+        .replace(/\n{3,}/g, "\n\n")
+        .replace(/\n/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      navigator.clipboard.writeText(compact)
+        .then(() => alert("改行少なめでコピーしたよ！"))
         .catch(() => alert("コピーに失敗したので手動でコピーしてね"));
     }
 
@@ -277,10 +371,12 @@ ${bg}
         subject: "",
         style: "",
         clothes: "",
-        bg: ""
+        bg: "",
+        streamTime: "",
+        tone: "soft"
       });
 
-      document.getElementById("output").textContent = "";
+      setOutput("");
       localStorage.removeItem(STORAGE_KEY);
       document.getElementById("saveStatus").textContent = "リセットしました";
     }
@@ -291,7 +387,9 @@ ${bg}
         subject: "30代女性 / ボブヘア / ツリ目 / 清楚系",
         style: "シンプル・おしゃれ・春・やわらかい自然光",
         clothes: "白ワンピ / 露出少なめ / 上品 / 長袖",
-        bg: "明るい室内 / 韓国風カフェ / ナチュラル"
+        bg: "明るい室内 / 韓国風カフェ / ナチュラル",
+        streamTime: "",
+        tone: "soft"
       });
       saveData();
     }
@@ -302,13 +400,16 @@ ${bg}
         subject: "男性 / 50代中心 / 常連＋ご新規",
         style: "かわいい・親しみ・やわらかい・少しわくわく感",
         clothes: "感謝 / 来てほしい導線 / 応援したくなる一言",
-        bg: "スマホで読みやすい短文 / コピペ用 / 絵文字少し"
+        bg: "スマホで読みやすい短文 / コピペ用 / 絵文字少し",
+        streamTime: "19:30",
+        tone: "soft"
       });
       saveData();
     }
 
     fieldIds.forEach((id) => {
       document.getElementById(id).addEventListener("input", saveData);
+      document.getElementById(id).addEventListener("change", saveData);
     });
 
     loadData();
